@@ -1,5 +1,8 @@
 import { Component } from 'react';
 
+import CardList from './components/card-list/card-list.component';
+import SearchBox from './components/search-box/search-box.component';
+
 import './App.css';
 
 class App extends Component {
@@ -14,42 +17,50 @@ class App extends Component {
 
   componentDidMount() {
     fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
+      .then((result) => result.json())
       .then((users) =>
-        this.setState(() => {
-          return { monsters: users };
-        })
+        this.setState(
+          () => {
+            return { monsters: users };
+          },
+          () => {
+            // console.log(this.state);
+          }
+        )
       );
   }
 
+  onSearchEvent = (event) => {
+    const searchField = event.target.value.toLowerCase();
+
+    this.setState(() => {
+      return { searchField };
+    });
+  };
+
   render() {
-    const filteredMonsters = this.state.monsters.filter((monster) => {
-      return monster.name.toLowerCase().includes(this.state.searchField);
+    const { monsters, searchField } = this.state;
+    const { onSearchEvent } = this;
+
+    const filteredMonster = monsters.filter((monster) => {
+      return monster.name.toLowerCase().includes(searchField);
     });
 
     return (
       <div className="App">
-        <input
+        <h1 className="app-title">Monsters Rolodex</h1>
+        <SearchBox
+          onChangeHandler={onSearchEvent}
           className="search-box"
-          type="search"
-          placeholder="Search monster"
-          onChange={(event) => {
-            const searchField = event.target.value.toLowerCase();
-
-            this.setState(() => {
-              return { searchField };
-            });
-          }}
+          placeholder="Search a monster"
         />
-        {filteredMonsters.map((monster) => {
-          return (
-            <div key={monster.id}>
-              <h1>{monster.name}</h1>
-            </div>
-          );
-        })}
+
+        <div>
+          <CardList monsters={filteredMonster} />
+        </div>
       </div>
     );
   }
 }
+
 export default App;
